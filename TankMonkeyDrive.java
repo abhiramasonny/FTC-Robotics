@@ -31,7 +31,7 @@ Driver Station.
     float front_right_pow;
     float back_right_pow;
     float back_left_pow;
-    
+    boolean rightStickBBB = true;
     frontRightMotor = hardwareMap.get(DcMotor.class, "frontRightMotor");
     backRightMotor = hardwareMap.get(DcMotor.class, "backRightMotor");
     frontLeftMotor = hardwareMap.get(DcMotor.class, "frontLeftMotor");
@@ -52,7 +52,9 @@ Driver Station.
       //leftArm.ZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
       while (opModeIsActive()) {
         
-        float strafecalc = gamepad1.right_stick_x;
+        float strafecalc = gamepad1.right_stick_x * 100;
+        strafecalc = (float)0.0001*(strafecalc*strafecalc*strafecalc);
+        strafecalc = (float)strafecalc/100;
         
         front_right_pow = gamepad1.right_stick_y;
         front_right_pow +=strafecalc;
@@ -80,36 +82,32 @@ Driver Station.
           intakeMotor.setPower(-1);
           outtake.setPower(1);
         } 
-        if (gamepad1.a) {
+        if (gamepad1.right_stick_button && rightStickBBB) {
           leftJoint.setPosition(-0.4);
           rightJoint.setPosition(-0.4);
-          
+          rightStickBBB = false;
+          sleep(1);
         }
-        if (gamepad1.b) {
+        if (gamepad1.right_stick_button && !rightStickBBB) {
           leftJoint.setPosition(0.41);
           rightJoint.setPosition(0.41);
+          rightStickBBB = true;
+          sleep(1);
         }
         if(gamepad1.right_bumper){
         while(gamepad1.right_bumper){
-          leftArm.setPower(slidesCounter);
-          rightArm.setPower(slidesCounter);
-          slidesCounter++;
+          leftArm.setPower(1);
+          rightArm.setPower(-1);
         }
-        } else{
-          slidesCounter = 0;
-        }
+        } 
         if(gamepad1.left_bumper){
         while(gamepad1.left_bumper){
-          leftArm.setPower(-slidesCounter);
-          rightArm.setPower(-slidesCounter);
-          slidesCounter++;
+          leftArm.setPower(-1);
+          rightArm.setPower(1);
         }
-        }else{
-          slidesCounter = 0;
         }
-        
-        leftArm.setPower(0.01);
-        rightArm.setPower(0.01);
+        leftArm.setPower(0.08);
+        rightArm.setPower(0.08);
         frontRightMotor.setPower(front_right_pow * 0.75);
         backRightMotor.setPower(back_right_pow * 0.75);
         frontLeftMotor.setPower(front_left_pow * 0.75);
